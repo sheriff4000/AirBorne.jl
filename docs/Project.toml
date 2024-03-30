@@ -1,4 +1,8 @@
 [deps]
 AirBorne = "4a232ea9-7d1f-4dd8-a126-b47d2ae9e134"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 DirectSearch = "9d7617aa-e122-4445-bdd0-98866dcb605d"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+Suppressor = "fd094767-a336-5f1f-9728-57cf17d0bbfb"

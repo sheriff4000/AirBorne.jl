@@ -13,8 +13,19 @@ using Dates: DateTime, dayofweek, Day
 import DotMaps.DotMap as DM
 using Statistics: std, mean
 using ...AirBorne: Wallet, Portfolio
-using ..Utils: makeRunning, lagFill, sortedStructInsert!
+using ..Utils: lagFill, sortedStructInsert!
 using ..ETL.AssetValuation: stockValuation, sharpe, valuePortfolio, returns
+using RollingFunctions: rollmean, rollstd, runstd, runmean
+using Plots: plot, plot!, mm
+using Plots
+
+"""
+    TimeEvent
+
+    This structure is used to define events in the simulation. 
+    The date attribute is used to determine the order of events in the simulation.
+    The type attribute is used to determine the type of event, for example "data_transfer" or "trading_logic".
+"""
 
 struct TimeEvent
     date::DateTime
@@ -134,7 +145,9 @@ function summarizePerformance(
     windowSize::Int=5,
     riskFreeRate::Real=0.0,
     includeAccounts::Bool=true,
+    plotSummary::Bool=false,
 )
+    println("Summarizing performance")
     summary = DataFrame(
         "date" => [e.date for e in context.audit.eventHistory],
         "type" => [e.type for e in context.audit.eventHistory],
@@ -157,14 +170,90 @@ function summarizePerformance(
         (includeAccounts ? r.account.usd.balance : 0) for r in eachrow(summary)
     ]
     summary[!, "return"] = returns(summary.dollarValue)
-    summary[!, "mean_return"] = makeRunning(
-        summary[!, "return"], mean; windowSize=windowSize
-    )
-    summary[!, "std_return"] = makeRunning(summary[!, "return"], std; windowSize=windowSize)
-    summary[!, "sharpe"] = sharpe(
-        summary.mean_return, summary.std_return; riskFreeRate=riskFreeRate
-    )
+    summary[!, "mean_return"] = runmean(summary[!, "return"], windowSize)
+    summary[!, "std_return"] = runstd(summary[!, "return"], windowSize)
+    summary[!, "sharpe"] = (summary.mean_return .- riskFreeRate) ./ summary.std_return
+    summary[!, "drawdown"] = [
+        100 * (summary.dollarValue[i] - maximum(summary.dollarValue[1:i])) /
+        maximum(summary.dollarValue[1:i]) for i in 1:length(summary.dollarValue)
+    ]
+    summary[!, "annual_return"] .=
+        (
+            summary.dollarValue[end] / summary.dollarValue[1]
+        )^(1 / (length(summary.dollarValue) / 252)) - 1
+    summary[!, "total_vol"] .= std(summary.return)
+    summary[!, "total_sharpe"] .=
+        (summary.annual_return .- riskFreeRate) ./ summary.total_vol
+    if plotSummary
+        plot_summary(summary)
+    end
     return summary
+end
+"""
+    print_summary(summary::DataFrame)
+
+    Given a summary of the performance of the portfolio over time, returns plots of the performance 
+    summary.
+    
+    # Arguments
+    - `summary::DataFrame`: A dataframe with the summary of the performance of the portfolio over time.
+        Must be same format as the output of `summarizePerformance` function.
+"""
+function plot_summary(summary)
+    sharpe = plot(
+        summary.date,
+        summary.sharpe;
+        title="Sharpe Ratio",
+        label="value",
+        linewidth=1,
+        xlabel="date",
+        ylabel="Sharpe Ratio",
+    )
+    rets = plot(
+        summary.date,
+        summary.return;
+        title="Returns",
+        label="value",
+        linewidth=1,
+        xlabel="date",
+        ylabel="Returns",
+    )
+    vol = plot(
+        summary.date,
+        summary.std_return;
+        title="Volatility",
+        label="value",
+        linewidth=1,
+        xlabel="date",
+        ylabel="Volatility",
+    )
+    drawdown = plot(
+        summary.date,
+        summary.drawdown;
+        title="Drawdown",
+        label="value",
+        linewidth=1,
+        xlabel="date",
+        ylabel="Drawdown (%)",
+    )
+    p = plot(
+        sharpe,
+        rets,
+        vol,
+        drawdown;
+        layout=(2, 2),
+        legend=false,
+        show=true,
+        size=(1000, 800),
+        top_margin=10Plots.mm,
+        bottom_margin=10Plots.mm,
+        left_margin=10Plots.mm,
+        right_margin=10Plots.mm,
+    )
+    println("Annual Return: ", summary.annual_return[end])
+    println("Total Volatility: ", summary.total_vol[end])
+    println("Total Sharpe Ratio: ", summary.total_sharpe[end])
+    return p
 end
 
 end
