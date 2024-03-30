@@ -72,7 +72,7 @@ using Logging
         max_date=DateTime(2019, 2, 1),
     )
     @test size(contextSMA.audit.portfolioHistory) == (760,)
-    @test size(summarizePerformance(data, contextSMA; removeWeekend=true), 1) == 544
+    @test size(summarizePerformance(data, contextSMA; removeWeekend=true, plotSummary=true), 1) == 544
 
     # Thorough testing on c_get
     contextSMA.extra.testFieldA = 20
