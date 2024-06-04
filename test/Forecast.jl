@@ -1,5 +1,5 @@
 using Test
-using AirBorne.Forecast: AutoRegressionForecast
+using AirBorne.Forecast.Linear: AutoRegressionForecast
 
 @testset "Forecast" begin
     @testset "AutoRegression" begin
