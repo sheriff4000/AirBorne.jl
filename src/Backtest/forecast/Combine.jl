@@ -20,7 +20,7 @@ Returns:
 - combinedForecast::Vector{Real}: The combined forecast
 """
 function combineForecasts(
-    forecasters::Vector{(Forecaster, Real)}, data::Vector{Real}; F::Int=1
+    forecasters::Vector{Tuple{Forecaster, Real}}, data::Vector{Real}; F::Int=1
 )
     combinedForecast = zeros(F)
     for (forecaster, weight) in forecasters
