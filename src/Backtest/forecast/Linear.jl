@@ -52,7 +52,7 @@ end
 
 """
 This function returns a forecaster object that can be used with the Combine module
-    
+	
 Arguments:
 - lookback::int The number of previous values to consider
 - reparameterise_window::int The number of points to use for reparameterisation
@@ -63,7 +63,7 @@ Returns:
 
 
 function LinearForecaster(lookback::Int, reparameterise_window::Int = 0)
-    return Combine.Forecaster(AutoRegressionForecast, [lookback; reparameterise_window])
+	return Combine.Forecaster(AutoRegressionForecast, [lookback; reparameterise_window])
 end
 
 end
