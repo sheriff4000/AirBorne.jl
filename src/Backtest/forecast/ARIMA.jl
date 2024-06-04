@@ -61,7 +61,7 @@ Returns:
 - autocorr::Vector{Real}: The autocorrelation of the time series
 """
 
-function arima(series, p::Int, d::Int, q::Int, F::Int)
+function arima(series, p::Int, d::Int, q::Int; F::Int = 1)
 	# Apply differencing
 	differenced_series, inits = apply_differencing(series, d)
 	ar_predictions = zeros(F)
@@ -99,4 +99,9 @@ function arima(series, p::Int, d::Int, q::Int, F::Int)
 	restored_series = undo_differencing([differenced_series; forecast], inits, d)
 	return restored_series[end-F+1:end]
 end
+
+function ArimaForecaster(p::Int, d::Int, q::Int)
+    return Combine.Forecaster(arima, [p; d; q])
+end
+
 end
