@@ -1,5 +1,8 @@
+module Linear
+
 using DataFrames
 using RollingFunctions
+using .Combine
 
 """
 This function returns the parameters of a linear regression model that predicts 
@@ -14,13 +17,13 @@ Returns:
 - params::AbstractArray{Real, 2} A vector of parameters for the linear regression model of shape (lookback, lookahead)
 """
 
-function AutoRegression(data::Vector{<:Real}, lookback::Int, lookahead::Int)
-	num_points = length(data) - lookback - lookahead + 1
+function AutoRegression(data::Vector{<:Real}, lookback::Int, F::Int = 1)
+	num_points = length(data) - lookback - F + 1
 	inputs = zeros(num_points, lookback)
-	outputs = zeros(num_points, lookahead)
+	outputs = zeros(num_points, F)
 	for i in 1:num_points
 		inputs[i, :] = (data[i:i+lookback-1])
-		outputs[i, :] = data[i+lookback:i+lookback+lookahead-1]
+		outputs[i, :] = data[i+lookback:i+lookback+F-1]
 	end
 	params = inputs \ outputs
 	return params
@@ -40,11 +43,15 @@ Returns:
 - forecast::Vector{Real} The forecasted values
 """
 
-function AutoRegressionForecast(data::Vector{<:Real}, lookback::Int, lookahead::Int; reparameterise_window::Int = 0)
+function AutoRegressionForecast(data::Vector{<:Real}, lookback::Int, reparameterise_window::Int = 0, F::Int = 1)
 	@assert length(data) > reparameterise_window "data must have more points than lookback + lookahead"
 	all_data = reparameterise_window == 0 ? data : data[end-reparameterise_window+1:end]
-	params = AutoRegression(all_data, lookback, lookahead)
+	params = AutoRegression(all_data, lookback, F)
 	return data[end-lookback+1:end]' * params
 end
 
+function LinearForecaster(lookback::Int, reparameterise_window::Int = 0)
+    return Combine.Forecaster(AutoRegressionForecast, [lookback; reparameterise_window])
+end
 
+end
