@@ -4,8 +4,8 @@ module Combine
 This struct represents a forecaster that can be combined with others
 """
 struct Forecaster
-	forecastFunction::Function
-	params::Vector{Real}
+    forecastFunction::Function
+    params::Vector{Real}
 end
 
 """
@@ -19,13 +19,15 @@ Arguments:
 Returns:
 - combinedForecast::Vector{Real}: The combined forecast
 """
-function combineForecasts(forecasters::Vector{(Forecaster, Real)}, data::Vector{Real}; F::Int = 1)
-	combinedForecast = zeros(F)
-	for (forecaster, weight) in forecasters
-		forecast = forecaster.forecastFunction(data, forecaster.params...; F = F)
-		combinedForecast += forecast .* weight
-	end
-	return combinedForecast
+function combineForecasts(
+    forecasters::Vector{(Forecaster, Real)}, data::Vector{Real}; F::Int=1
+)
+    combinedForecast = zeros(F)
+    for (forecaster, weight) in forecasters
+        forecast = forecaster.forecastFunction(data, forecaster.params...; F=F)
+        combinedForecast += forecast .* weight
+    end
+    return combinedForecast
 end
 
 end
