@@ -12,4 +12,5 @@ using TestSetExtensions
     include("./sources.jl")
     include("./StaticMarket.jl")
     include("./utils.jl")
+    include("./Forecast.jl")
 end

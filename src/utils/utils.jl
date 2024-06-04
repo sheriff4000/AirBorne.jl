@@ -8,7 +8,7 @@ using SparseArrays: sparse, I, blockdiag
 	Returns a string saying "Hello World!".
 	"""
 function hello_world()
-	return "Hello World!"
+    return "Hello World!"
 end
 
 """ 
@@ -18,14 +18,14 @@ end
 	sparse matrices.
 """
 function rvcat(v) # It may not be needed?
-	v2 = length(v) > 2 ? rvcat(v[2:end]) : v[2]
-	return vcat(v[1], v2)
+    v2 = length(v) > 2 ? rvcat(v[2:end]) : v[2]
+    return vcat(v[1], v2)
 end
 
 " Recursive block diagonal "
-function rblockdiag(v::Union{Vector{Matrix{Union{Float64}}}, Vector{Matrix{Union{Int64}}}})
-	v2 = length(v) > 2 ? rblockdiag(v[2:end]) : sparse(v[2])
-	return blockdiag(sparse(v[1]), v2)
+function rblockdiag(v::Union{Vector{Matrix{Union{Float64}}},Vector{Matrix{Union{Int64}}}})
+    v2 = length(v) > 2 ? rblockdiag(v[2:end]) : sparse(v[2])
+    return blockdiag(sparse(v[1]), v2)
 end
 
 "Kronecker delta"
@@ -37,8 +37,8 @@ end
 
 	Inserts a struct into a **sorted** Vector of structs in the right place to keep the array sorted.
 	"""
-function sortedStructInsert!(v::Vector, x, symbol; rev = true)
-	return (splice!(v, searchsorted(v, x; by = v -> getproperty(v, symbol), rev = rev), [x]); v)
+function sortedStructInsert!(v::Vector, x, symbol; rev=true)
+    return (splice!(v, searchsorted(v, x; by=v -> getproperty(v, symbol), rev=rev), [x]); v)
 end
 
 """
@@ -46,8 +46,8 @@ end
 
 	Sorts a struct by a given symbol.
 	"""
-function sortStruct!(v::Vector, symbol; rev = true)
-	return sort!(v; by = v -> getproperty(v, symbol), rev = rev)
+function sortStruct!(v::Vector, symbol; rev=true)
+    return sort!(v; by=v -> getproperty(v, symbol), rev=rev)
 end
 
 """
@@ -56,7 +56,7 @@ end
 	Inserts the deepcopy of an element into a collection 
 	"""
 function deepPush!(list, element)
-	return push!(list, deepcopy(element))
+    return push!(list, deepcopy(element))
 end
 
 """
@@ -69,9 +69,9 @@ end
 	```
 """
 function get_latest(df, id_symbols, sort_symbol)
-	return combine(groupby(df, id_symbols)) do sdf
-		sdf[argmax(sdf[!, sort_symbol]), :]
-	end
+    return combine(groupby(df, id_symbols)) do sdf
+        sdf[argmax(sdf[!, sort_symbol]), :]
+    end
 end
 
 """
@@ -113,11 +113,11 @@ end
 	```
 """
 function get_latest_N(
-	sdf::Union{SubDataFrame, DataFrame}, by::Symbol, N::Int64; rev = false, fields::Vector = [],
+    sdf::Union{SubDataFrame,DataFrame}, by::Symbol, N::Int64; rev=false, fields::Vector=[]
 )
-	fields = fields == [] ? names(sdf) : fields
-	sorted = sort(sdf, by; rev = rev)
-	return DataFrame(Dict([x => first(sorted[!, x], N) for x in fields]))
+    fields = fields == [] ? names(sdf) : fields
+    sorted = sort(sdf, by; rev=rev)
+    return DataFrame(Dict([x => first(sorted[!, x], N) for x in fields]))
 end
 
 """
@@ -129,40 +129,40 @@ end
 	-`inV::Vector`: Input Vector
 	-`fill::Vector`: Vector with elements to be filled. I.e., nothing, NaN, missing. By default: [missing,nothing].
 """
-function lagFill(inV::Vector; fill::Vector = [missing, nothing])
-	out = inV
-	trigger_funs = []
-	if any(ismissing.(fill))
-		deleteat!(fill, findall(x -> ismissing(x), fill))
-		push!(trigger_funs, ismissing)
-	end
-	if any(isnothing.(fill))
-		deleteat!(fill, findall(x -> isnothing(x), fill))
-		push!(trigger_funs, isnothing)
-	end
+function lagFill(inV::Vector; fill::Vector=[missing, nothing])
+    out = inV
+    trigger_funs = []
+    if any(ismissing.(fill))
+        deleteat!(fill, findall(x -> ismissing(x), fill))
+        push!(trigger_funs, ismissing)
+    end
+    if any(isnothing.(fill))
+        deleteat!(fill, findall(x -> isnothing(x), fill))
+        push!(trigger_funs, isnothing)
+    end
 
-	for i in 2:length(out)
-		if any([f(out[i]) for f in trigger_funs]) || (out[i] ∈ fill)
-			out[i] = out[i-1]
-		end
-	end
-	return out
+    for i in 2:length(out)
+        if any([f(out[i]) for f in trigger_funs]) || (out[i] ∈ fill)
+            out[i] = out[i - 1]
+        end
+    end
+    return out
 end
 
 """
 	More efficient implementation of a moving average (mean running).
 """
-function movingAverage(array::Vector; windowSize::Int = 1, startFrom::Int = 1)
-	out = Array{Union{Float64, Nothing}}(undef, length(array)) # Preallocate memory
-	start(i) = max(i - windowSize, 1)
-	factor(i) = min(windowSize, i + 1 - startFrom)
-	sum_value = 0
-	for i in startFrom:length(array)
-		sum_value += array[i]
-		sum_value -= i + 1 - startFrom > windowSize ? array[start(i)] : 0
-		out[i] = sum_value / factor(i)
-	end
-	return out
+function movingAverage(array::Vector; windowSize::Int=1, startFrom::Int=1)
+    out = Array{Union{Float64,Nothing}}(undef, length(array)) # Preallocate memory
+    start(i) = max(i - windowSize, 1)
+    factor(i) = min(windowSize, i + 1 - startFrom)
+    sum_value = 0
+    for i in startFrom:length(array)
+        sum_value += array[i]
+        sum_value -= i + 1 - startFrom > windowSize ? array[start(i)] : 0
+        out[i] = sum_value / factor(i)
+    end
+    return out
 end
 
 """
@@ -179,15 +179,14 @@ end
 	- `ignoreFirst::Int`: Indicates for how many elements the operation should not be applied. In those elements "nothing" will be placed instead.
 """
 function makeRunning(
-	array::Vector, fun::Function; windowSize::Union{Int64, Nothing} = nothing, startFrom::Int = 1,
+    array::Vector, fun::Function; windowSize::Union{Int64,Nothing}=nothing, startFrom::Int=1
 )
-	out = Array{Union{Float64, Nothing}}(undef, length(array)) # Preallocate memory
-	start(i) = windowSize === nothing ? startFrom : max(i - windowSize + 1, startFrom)
-	for i in startFrom:length(array)
-		out[i] = fun(array[start(i):i])
-	end
-	return out
+    out = Array{Union{Float64,Nothing}}(undef, length(array)) # Preallocate memory
+    start(i) = windowSize === nothing ? startFrom : max(i - windowSize + 1, startFrom)
+    for i in startFrom:length(array)
+        out[i] = fun(array[start(i):i])
+    end
+    return out
 end
-
 
 end

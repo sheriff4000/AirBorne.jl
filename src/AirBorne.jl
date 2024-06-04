@@ -10,4 +10,5 @@ include("./Backtest/Structures.jl") # Structures for Backtesting, may use Financ
 include("./Backtest/Engines.jl")
 include("./Backtest/Markets.jl")
 include("./Backtest/Strategies.jl")
+include("./Backtest/Forecast.jl")
 end
