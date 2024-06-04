@@ -50,6 +50,18 @@ function AutoRegressionForecast(data::Vector{<:Real}, lookback::Int, reparameter
 	return data[end-lookback+1:end]' * params
 end
 
+"""
+This function returns a forecaster object that can be used with the Combine module
+    
+Arguments:
+- lookback::int The number of previous values to consider
+- reparameterise_window::int The number of points to use for reparameterisation
+
+Returns:
+- forecaster::Combine.Forecaster The forecaster
+"""
+
+
 function LinearForecaster(lookback::Int, reparameterise_window::Int = 0)
     return Combine.Forecaster(AutoRegressionForecast, [lookback; reparameterise_window])
 end
