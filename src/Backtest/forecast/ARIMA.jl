@@ -4,7 +4,7 @@ using LinearAlgebra
 using ToeplitzMatrices
 using Random
 using Distributions
-using .Combine
+using ..Combine
 
 """
 This function applies differencing to a time series

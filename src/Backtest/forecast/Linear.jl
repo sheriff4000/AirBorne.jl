@@ -2,7 +2,7 @@ module Linear
 
 using DataFrames
 using RollingFunctions
-using .Combine
+using ..Combine
 
 """
 This function returns the parameters of a linear regression model that predicts 
