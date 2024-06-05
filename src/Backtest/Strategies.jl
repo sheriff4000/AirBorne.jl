@@ -8,4 +8,5 @@ module Strategies
 include("./strategies/MeanVarianceMPC.jl")
 include("./strategies/Markowitz.jl")
 include("./strategies/SMA.jl")
+include("./strategies/FALM.jl")
 end
