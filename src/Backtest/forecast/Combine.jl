@@ -22,7 +22,7 @@ Arguments:
 Returns:
 - forecast::Vector{Real}: The forecast
 """
-function applyForecast(forecaster::Forecaster, data; F=1) 
+function applyForecast(forecaster::Forecaster, data; F=1)
     return forecaster.forecastFunction(data, forecaster.params...; F=F)
 end
 
@@ -37,10 +37,8 @@ Arguments:
 Returns:
 - combinedForecast::Vector{Real}: The combined forecast
 """
-function combineForecasts(
-    forecasters::Vector{Tuple{Forecaster,Real}}
-)
-   function forecasterFun(data::Vector{Real}, params::Real...; F::Int=1)
+function combineForecasts(forecasters::Vector{Tuple{Forecaster,Real}})
+    function forecasterFun(data::Vector{Real}, params::Real...; F::Int=1)
         combinedForecast = zeros(F)
         for (forecaster, weight) in forecasters
             forecast = applyForecast(forecaster, data; F=F)
@@ -50,9 +48,5 @@ function combineForecasts(
 
     return Forecaster(forecasterFun, [])
 end
-
-
-
-
 
 end
