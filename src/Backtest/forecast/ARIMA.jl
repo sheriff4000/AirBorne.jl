@@ -62,9 +62,13 @@ Returns:
 - autocorr::Vector{Real}: The autocorrelation of the time series
 """
 
-function arima(series, p::Int, d::Int, q::Int; F::Int=1)
+function arima(series, p::Int, d::Int, q::Int, reparameterise_window::Int=0; F::Int=1)
     # Apply differencing
-    differenced_series, inits = apply_differencing(series, d)
+    if reparameterise_window > length(series)
+        reparameterise_window = length(series)
+    end
+    all_data = reparameterise_window == 0 ? series : series[(end - reparameterise_window + 1):end]
+    differenced_series, inits = apply_differencing(all_data, d)
     ar_predictions = zeros(F)
     # Calculate the autocorrelation matrix
     autocorr = autocor(differenced_series)
@@ -119,8 +123,8 @@ Returns:
 - Combined::Combine.Forecaster: The forecaster
 """
 
-function ArimaForecaster(p::Int, d::Int, q::Int)
-    return Combine.Forecaster(arima, [p; d; q])
+function ArimaForecaster(p::Int, d::Int, q::Int; reparameterise_window::Int=0)
+    return Combine.Forecaster(arima, [p; d; q; reparameterise_window])
 end
 
 end

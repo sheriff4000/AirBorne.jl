@@ -9,6 +9,7 @@ using DataFrames: DataFrame
 using DirectSearch
 using Suppressor
 using DotMaps
+using Statistics
 
 """
     initialize!
