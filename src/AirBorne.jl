@@ -9,6 +9,6 @@ include("./ETL/ETL.jl") # Retrieval and pre-processing of data
 include("./Backtest/Structures.jl") # Structures for Backtesting, may use Financial Models.
 include("./Backtest/Engines.jl")
 include("./Backtest/Markets.jl")
-include("./Backtest/Strategies.jl")
 include("./Backtest/Forecast.jl")
+include("./Backtest/Strategies.jl")
 end
