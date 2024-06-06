@@ -2,10 +2,12 @@ module FALM
 
 using ...Markets.StaticMarket: Order, place_order!, ordersForPortfolioRedistribution
 using AirBorne.ETL.AssetValuation: stockValuation
-using ...Forecast: Forecaster, LinearForecaster
+using ...Forecast.Combine: Forecaster, applyForecast
+using ...Forecast.Linear: LinearForecaster
 using ...Structures: ContextTypeA
 using DataFrames: DataFrame
 using DirectSearch
+using Suppressor
 
 """
     initialize!
