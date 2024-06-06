@@ -69,7 +69,8 @@ function arima(series, p::Int, d::Int, q::Int, reparameterise_window::Int=0; F::
     if reparameterise_window > length(series)
         reparameterise_window = length(series)
     end
-    all_data = reparameterise_window == 0 ? series : series[(end - reparameterise_window + 1):end]
+    all_data =
+        reparameterise_window == 0 ? series : series[(end - reparameterise_window + 1):end]
     differenced_series, inits = apply_differencing(all_data, d)
     ar_predictions = zeros(F)
     # Calculate the autocorrelation matrix

@@ -46,8 +46,10 @@ Returns:
 function AutoRegressionForecast(
     data::Vector{<:Real}, lookback::Int, reparameterise_window::Int=0; F::Int=1
 )
-    if  reparameterise_window > length(data) 
-        println("data must have more points than lookback + lookahead, reparameterise_window set to maximum value")
+    if reparameterise_window > length(data)
+        println(
+            "data must have more points than lookback + lookahead, reparameterise_window set to maximum value",
+        )
         reparameterise_window = length(data)
     end
     all_data =

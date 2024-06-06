@@ -34,7 +34,6 @@ using Logging
     tickers = unique(data.symbol)
     assetIDs = collect(unique(data.assetID))
 
-
     ######################
     ###  MPC Strategy  ###
     ######################
@@ -44,14 +43,9 @@ using Logging
         TimeEvent(t, "data_transfer") for t in sort(unique(data.date); rev=true)
     ]
 
-
     # Simulation functions definition
     function initialize!(context)
-        return falm_initialize!(
-            context;
-            tickers=tickers,
-            assetIDs=assetIDs,
-        )
+        return falm_initialize!(context; tickers=tickers, assetIDs=assetIDs)
     end
 
     function trading_logic!(context, data)
