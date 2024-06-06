@@ -36,7 +36,7 @@ function falm_initialize!(
     assetIDs::Union{Vector{String}}=nothing, # Associated AssetIDs for the tickers
     transactionCost::Real=0.02, # Transaction cost
     currency::String="FEX/USD", # Currency to use
-    forecaster::Forecaster=LinearForecaster(1, 0), # Forecasting function
+    forecaster::Forecaster=LinearForecaster(1; reparameterise_window = 0), # Forecasting function
     httype::Int=1, # 1: Weighted Average holding time, 2: Minimum holding time
     min_alloc_threshold::Float64=0.7,
     min_returns_threshold::Float64=0.0002,
