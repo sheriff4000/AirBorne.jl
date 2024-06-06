@@ -8,6 +8,7 @@ using ...Structures: ContextTypeA
 using DataFrames: DataFrame
 using DirectSearch
 using Suppressor
+using DotMaps
 
 """
     initialize!
@@ -34,7 +35,7 @@ function falm_initialize!(
     assetIDs::Union{Vector{String}}=nothing, # Associated AssetIDs for the tickers
     transactionCost::Real=0.02, # Transaction cost
     currency::String="FEX/USD", # Currency to use
-    forecastFun::Forecaster=LinearForecaster(1, 0), # Forecasting function
+    forecaster::Forecaster=LinearForecaster(1, 0), # Forecasting function
     httype::Int=1, # 1: Weighted Average holding time, 2: Minimum holding time
     min_alloc_threshold::Float64=0.7,
     min_returns_threshold::Float64=0.0002,
@@ -50,7 +51,7 @@ function falm_initialize!(
     context.extra.currentValue = DataFrame()
     context.extra.currency_symbol = currency
     context.extra.assetIDs = assetIDs
-    context.extra.forecastFun = forecastFun
+    context.extra.forecaster = forecaster
     context.extra.httype = httype
     context.extra.min_alloc_threshold = min_alloc_threshold
     context.extra.min_returns_threshold = min_returns_threshold
@@ -124,7 +125,7 @@ function compute_portfolio!(context::ContextTypeA; data=DataFrame())
         prices = data[data.symbol .== t, :close]
         # CUSTOM FORECAST ##
         forecast = applyForecast(
-            context.extra.forecastFun, prices; F=context.extra.lookahead
+            context.extra.forecaster, prices; F=context.extra.lookahead
         )
         relative_returns = log.(forecast ./ prices[end])
         relative_returns = [relative_returns[i] / i for i in 1:(context.extra.lookahead)]
