@@ -46,7 +46,10 @@ Returns:
 function AutoRegressionForecast(
     data::Vector{<:Real}, lookback::Int, reparameterise_window::Int=0; F::Int=1
 )
-    @assert length(data) > reparameterise_window "data must have more points than lookback + lookahead"
+    if  reparameterise_window > length(data) 
+        println("data must have more points than lookback + lookahead, reparameterise_window set to maximum value")
+        reparameterise_window = length(data)
+    end
     all_data =
         reparameterise_window == 0 ? data : data[(end - reparameterise_window + 1):end]
     params = AutoRegression(all_data, lookback; F=F)
@@ -64,7 +67,7 @@ Returns:
 - forecaster::Combine.Forecaster The forecaster
 """
 
-function LinearForecaster(lookback::Int, reparameterise_window::Int=0)
+function LinearForecaster(lookback::Int; reparameterise_window::Int=0)
     return Combine.Forecaster(AutoRegressionForecast, [lookback; reparameterise_window])
 end
 

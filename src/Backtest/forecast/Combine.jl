@@ -8,7 +8,7 @@ forecastFunction(data::Vector{Real}, params::Real...; F::Int=1) -> Vector{Real}
 """
 struct Forecaster
     forecastFunction::Function
-    params::Vector{Real}
+    params::Vector{Any}
 end
 
 """
@@ -37,16 +37,17 @@ Arguments:
 Returns:
 - combinedForecast::Vector{Real}: The combined forecast
 """
-function combineForecasts(forecasters::Vector{Tuple{Forecaster,Real}})
-    function forecasterFun(data::Vector{Real}, params::Real...; F::Int=1)
+function combineForecasts(forecasters::Vector{Tuple{Forecaster, Float64}})
+    function forecasterFun(data::Vector{<:Real}, params::Any...; F::Int=1)
         combinedForecast = zeros(F)
-        for (forecaster, weight) in forecasters
-            forecast = applyForecast(forecaster, data; F=F)
-            combinedForecast += forecast .* weight
+        for (forecaster, weight) in params
+            forecast = applyForecast(forecaster, data; F=F) .* weight
+            combinedForecast = combinedForecast .+ forecast
         end
+        return combinedForecast
     end
 
-    return Forecaster(forecasterFun, [])
+    return Forecaster(forecasterFun, [forecasters...])
 end
 
 end
