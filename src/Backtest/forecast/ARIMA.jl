@@ -4,6 +4,8 @@ using LinearAlgebra
 using ToeplitzMatrices
 using Random
 using Distributions
+using StatsBase
+
 using ..Combine
 
 """
@@ -67,13 +69,14 @@ function arima(series, p::Int, d::Int, q::Int, reparameterise_window::Int=0; F::
     if reparameterise_window > length(series)
         reparameterise_window = length(series)
     end
-    all_data = reparameterise_window == 0 ? series : series[(end - reparameterise_window + 1):end]
+    all_data =
+        reparameterise_window == 0 ? series : series[(end - reparameterise_window + 1):end]
     differenced_series, inits = apply_differencing(all_data, d)
     ar_predictions = zeros(F)
     # Calculate the autocorrelation matrix
     autocorr = autocor(differenced_series)
-    # Create the Toeplitz matrix
-    R_matrix = Toeplitz(autocorr[1:p], autocorr[1:p])
+    # Create the Toeplitz matrix]
+    R_matrix = SymmetricToeplitz(autocorr[1:p])
     r_vector = autocorr[2:(p + 1)]
     # ar_coeffs = []
 
@@ -101,7 +104,8 @@ function arima(series, p::Int, d::Int, q::Int, reparameterise_window::Int=0; F::
                 )^2 for i in 1:(length(differenced_series) - p - 1)
             )
         # ma_var = sample_var * ma_coeff
-        ma_samples = rand(Normal(0, sqrt(ma_var / (length(differenced_series) - p - 1))), F)
+        dist = Normal(0, sqrt(ma_var / (length(differenced_series) - p - 1)))
+        ma_samples = rand(dist, F)
         ma_predictions = ma_samples
     end
     # Forecast

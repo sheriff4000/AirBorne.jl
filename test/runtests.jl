@@ -6,6 +6,7 @@ using TestSetExtensions
     include("./backtest_Basic.jl")
     include("./backtest_Advanced.jl")
     include("./backtest_MPC.jl")
+    include("./backtest_FALM.jl")
     include("./cache.jl")
     include("./FM.jl")
     include("./helloWorlds.jl")
