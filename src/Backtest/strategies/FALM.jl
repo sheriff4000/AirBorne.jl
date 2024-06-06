@@ -210,7 +210,7 @@ function compute_portfolio!(context::ContextTypeA; data=DataFrame())
     return nothing
 end
 
-function algo_trading_logic!(
+function falm_trading_logic!(
     context::ContextTypeA, data::DataFrame; nextEventFun::Union{Function,Nothing}=nothing
 )
     # Only trade when there is enough data
