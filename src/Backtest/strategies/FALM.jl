@@ -51,7 +51,7 @@ function falm_initialize!(
     transactionCost::Real=0.02, # Transaction cost
     currency::String="FEX/USD", # Currency to use
     forecaster::Forecaster=LinearForecaster(1; reparameterise_window=0), # Forecasting function
-    httype::Int=1, # 1: Weighted Average holding time, 2: Minimum holding time
+    httype::Symbol=:average, # 1: Weighted Average holding time, 2: Minimum holding time
     min_alloc_threshold::Float64=0.7,
     min_returns_threshold::Float64=0.0002,
 )
@@ -232,7 +232,7 @@ function compute_portfolio!(context::ContextTypeA; data=DataFrame())
         )
     end
 
-    if context.extra.httype == 1
+    if context.extra.httype == :average
         # Weighted Average Holding time
         context.extra.htcounter = round(Int, holding_time)
     else
