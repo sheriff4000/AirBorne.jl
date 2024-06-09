@@ -22,7 +22,7 @@ using JuMP:
     @NLobjective,
     value,
     set_silent
-using SparseArrays: sparse, I, spdiagm
+using SparseArrays: sparse, I, spdiagm, SparseVector
 using Ipopt: Ipopt
 import MathOptInterface as MOI
 """
