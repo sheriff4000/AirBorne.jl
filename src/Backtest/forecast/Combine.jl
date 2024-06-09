@@ -1,14 +1,23 @@
 module Combine
 
 """
-This struct represents a forecaster that can be combined with others
+This struct represents a general forecaster that can be combined with others
 
 Can apply forecast to data with the following signature:
 forecastFunction(data::Vector{Real}, params::Real...; F::Int=1) -> Vector{Real}
 """
 struct Forecaster
-    forecastFunction::Function
-    params::Vector{Any}
+	forecastFunction::Function
+	params::Vector{Any}
+end
+
+"""
+This struct represents a combined forecaster that is a linear combination of other forecasters
+"""
+struct CombinedForecaster <: Forecaster
+	forecasters::Vector{<:Forecaster}
+	weights::Vector{<:Real}
+	CombinedForecaster(forecasters::Vector{Forecaster}, weights::Vector{<:Real}) = length(forecasters) == length(weights) ? new(forecasters, weights) : throw(ArgumentError("Length of forecasters and weights must be equal"))
 end
 
 """
@@ -22,8 +31,20 @@ Arguments:
 Returns:
 - forecast::Vector{Real}: The forecast
 """
-function applyForecast(forecaster::Forecaster, data; F=1)
-    return forecaster.forecastFunction(data, forecaster.params...; F=F)
+function applyForecast(forecaster::Forecaster, data; F = 1)
+	return forecaster.forecastFunction(data, forecaster.params...; F = F)
+end
+
+"""
+This function applies a combined forecaster to a dataset
+"""
+
+function applyForecast(forecaster::CombinedForecaster, data; F = 1)
+	forecast = zeros(F)
+	for (forecaster, weight) in zip(forecaster.forecasters, forecaster.weights)
+		forecast = forecast .+ applyForecast(forecaster, data; F = F) .* weight
+	end
+	return forecast
 end
 
 """
@@ -37,17 +58,17 @@ Arguments:
 Returns:
 - combinedForecast::Vector{Real}: The combined forecast
 """
-function combineForecasts(forecasters::Vector{Tuple{Forecaster,Float64}})
-    function forecasterFun(data::Vector{<:Real}, params::Any...; F::Int=1)
-        combinedForecast = zeros(F)
-        for (forecaster, weight) in params
-            forecast = applyForecast(forecaster, data; F=F) .* weight
-            combinedForecast = combinedForecast .+ forecast
-        end
-        return combinedForecast
-    end
+function combineForecasts(forecasters::Vector{Tuple{Forecaster, Float64}})
+	function forecasterFun(data::Vector{<:Real}, params::Any...; F::Int = 1)
+		combinedForecast = zeros(F)
+		for (forecaster, weight) in params
+			forecast = applyForecast(forecaster, data; F = F) .* weight
+			combinedForecast = combinedForecast .+ forecast
+		end
+		return combinedForecast
+	end
 
-    return Forecaster(forecasterFun, [forecasters...])
+	return Forecaster(forecasterFun, [forecasters...])
 end
 
 end
