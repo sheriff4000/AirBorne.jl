@@ -47,28 +47,4 @@ function applyForecast(forecaster::CombinedForecaster, data; F = 1)
 	return forecast
 end
 
-"""
-This function combines the forecasts of multiple forecasters
-
-Arguments:
-- forecasters::Vector{(Forecaster, Real)}: The forecasters to combine and their associated weights
-- data::Vector{Real}: The data to forecast
-- F::Int: The number of future values to forecast
-
-Returns:
-- combinedForecast::Vector{Real}: The combined forecast
-"""
-function combineForecasts(forecasters::Vector{Tuple{Forecaster, Float64}})
-	function forecasterFun(data::Vector{<:Real}, params::Any...; F::Int = 1)
-		combinedForecast = zeros(F)
-		for (forecaster, weight) in params
-			forecast = applyForecast(forecaster, data; F = F) .* weight
-			combinedForecast = combinedForecast .+ forecast
-		end
-		return combinedForecast
-	end
-
-	return Forecaster(forecasterFun, [forecasters...])
-end
-
 end
