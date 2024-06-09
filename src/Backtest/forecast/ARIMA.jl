@@ -123,7 +123,7 @@ struct ArimaForecaster <: Forecaster
 	ArimaForecaster(p::Int, d::Int, q::Int; reparameterise_window::Int = 0) = new(p, d, q, reparameterise_window)
 end
 
-function applyForecast(forecaster::ArimaForecaster, series; F::Int = 1)
+function applyForecast(forecaster::ArimaForecaster, series::Vector{<:Real}; F::Int = 1)
 	return arima(series, forecaster.p, forecaster.d, forecaster.q, forecaster.reparameterise_window; F = F)
 end
 

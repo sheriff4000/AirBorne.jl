@@ -13,7 +13,7 @@ end
 """
 This function applies a combined forecaster to a dataset
 """
-function applyForecast(forecaster::CombinedForecaster, data; F = 1)
+function applyForecast(forecaster::CombinedForecaster, data::Vector{<:Real}; F = 1)
 	forecast = zeros(F)
 	for (forecaster, weight) in zip(forecaster.forecasters, forecaster.weights)
 		forecast = forecast .+ applyForecast(forecaster, data; F = F) .* weight
