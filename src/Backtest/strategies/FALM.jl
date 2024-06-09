@@ -12,7 +12,16 @@ using Suppressor
 using DotMaps
 using Statistics
 
-using JuMP:@variable, @expression, Model, @objective, @constraint, optimize!, @NLobjective, value, set_silent
+using JuMP:
+    @variable,
+    @expression,
+    Model,
+    @objective,
+    @constraint,
+    optimize!,
+    @NLobjective,
+    value,
+    set_silent
 using SparseArrays: sparse, I, spdiagm
 using Ipopt: Ipopt
 import MathOptInterface as MOI
@@ -102,7 +111,7 @@ function my_ordersForPortfolioRedistribution(
     account::Any=nothing,
     costPropFactor::Real=0,
     costPerTransactionFactor::Real=0,
-    min_shares_threshold::Real=10^-5
+    min_shares_threshold::Real=10^-5,
 )
     # Generate Source Distribution from Portfolio
     totalValue = sum([sourcePortfolio[x] * assetPricing[x] for x in keys(sourcePortfolio)])
@@ -153,7 +162,10 @@ function my_ordersForPortfolioRedistribution(
     #### 
     #### Parsing & Order Generation
     ####
-    n_shares = Dict([assetSort[x] => d[x] for x in 1:N if (x != curency_pos) && (abs(d[x])>min_shares_threshold)])
+    n_shares = Dict([
+        assetSort[x] => d[x] for
+        x in 1:N if (x != curency_pos) && (abs(d[x]) > min_shares_threshold)
+    ])
     orders = [my_genOrder(x, n_shares[x]; account=account) for x in keys(n_shares)]
     return orders
 end
