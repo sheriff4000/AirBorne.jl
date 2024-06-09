@@ -45,7 +45,6 @@ using Logging
 
     # Simulation functions definition
     function initialize!(context)
-        context.extra.htcounter = 0
         return falm_initialize!(context; tickers=tickers, assetIDs=assetIDs)
     end
 
