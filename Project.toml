@@ -1,7 +1,7 @@
 name = "AirBorne"
 uuid = "4a232ea9-7d1f-4dd8-a126-b47d2ae9e134"
-authors = ["Bruno Castro Ibarburu"]
-version = "1.0.0-DEV"
+authors = ["Bruno Castro Ibarburu", "Sherif Doherty"]
+version = "1.0.1-DEV"
 
 [deps]
 Bijections = "e2ed5e7c-b2de-5872-ae92-c73ca462fb04"
