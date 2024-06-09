@@ -2,6 +2,7 @@ module FALM
 
 using ...Markets.StaticMarket: Order, place_order!, ordersForPortfolioRedistribution
 using AirBorne.ETL.AssetValuation: stockValuation
+using AirBorne.Utils: rvcat, rblockdiag, δ
 using ...Forecast.Combine: Forecaster, applyForecast
 using ...Forecast.Linear: LinearForecaster
 using ...Structures: ContextTypeA
@@ -11,6 +12,10 @@ using Suppressor
 using DotMaps
 using Statistics
 
+using JuMP:@variable, @expression, Model, @objective, @constraint, optimize!, @NLobjective, value, set_silent
+using SparseArrays: sparse, I, spdiagm
+using Ipopt: Ipopt
+import MathOptInterface as MOI
 """
     initialize!
 
@@ -82,6 +87,75 @@ function falm_initialize!(
         nextEventFun(context)
     end
     return nothing
+end
+
+"""
+    This function generates the orders to obtain a particular value distribution on a given portfolio and static pricing.
+    It can consider proportional costs by scaling the orders amount by a factor and a fixed cost for each transacted asset.
+    It returns the portfolio with the desired distribution and the maximum amount of value expressed in a particular currency.
+"""
+function my_ordersForPortfolioRedistribution(
+    sourcePortfolio::Dict{String,Float64},
+    targetDistribution::Dict{String,Float64},
+    assetPricing::Dict{String,Float64};
+    curency_symbol::String="FEX/USD",
+    account::Any=nothing,
+    costPropFactor::Real=0,
+    costPerTransactionFactor::Real=0,
+    min_shares_threshold::Real=10^-5
+)
+    # Generate Source Distribution from Portfolio
+    totalValue = sum([sourcePortfolio[x] * assetPricing[x] for x in keys(sourcePortfolio)])
+    sourceDst = Dict([
+        x => sourcePortfolio[x] * assetPricing[x] / totalValue for
+        x in keys(sourcePortfolio)
+    ])
+
+    assetSort = [x for x in keys(sourceDst)]
+    N = length(assetSort)
+    curency_pos = findall(x -> x == curency_symbol, assetSort)[1]
+    ShareVals = [assetPricing[x] for x in assetSort]
+    propShareVal = ShareVals ./ totalValue # Share Price expressed in terms of portfolio units.
+
+    # Problem Vectorization: D1 + P*d - Fees -> D2*k
+    D1 = [get(sourceDst, x, 0) for x in assetSort] # Source
+    D2 = [get(targetDistribution, x, 0) for x in assetSort] # Objective
+    M = zeros(N, N)
+    M[curency_pos, :] = propShareVal .* -1 # Price to pay per share (without fees)
+    P = spdiagm(0 => propShareVal) + M
+    FDollars = SparseVector(N, [curency_pos], [1]) # Dollar Fees Vector
+
+    #####
+    ##### Optimization Problem
+    #####
+    genOrderModel = Model(Ipopt.Optimizer)
+    set_silent(genOrderModel)
+    @variable(genOrderModel, 0 <= k) # Proportionality factor (shrinkage of portfolio)
+    @variable(genOrderModel, d[1:N])  # Amount to buy/sell of each asset
+    @variable(genOrderModel, propFees >= 0) # Amount Proportional Fees
+    @constraint(
+        genOrderModel,
+        [propFees; (propShareVal .* d) .* costPropFactor] in MOI.NormOneCone(1 + N)
+    ) # Implementation of norm-1 for Fees
+    @variable(genOrderModel, perTransactionFixFees >= 0) # Number of transactions fees
+    @constraint(
+        genOrderModel, perTransactionFixFees == sum(-δ.(d) .+ 1) * costPerTransactionFactor
+    ) # Implementation of norm-1 for Fees
+    @constraint(genOrderModel, d[curency_pos] == 0) # Do not buy or sell dollars (this is the currency).
+    @constraint(
+        genOrderModel,
+        D1 .+ (P * d) .- (FDollars .* (propFees + perTransactionFixFees)) .== D2 .* k
+    ) # Distribution ratio
+    @objective(genOrderModel, Max, k) # With variance minimization
+    optimize!(genOrderModel)
+    d = value.(d)
+
+    #### 
+    #### Parsing & Order Generation
+    ####
+    n_shares = Dict([assetSort[x] => d[x] for x in 1:N if (x != curency_pos) && (abs(d[x])>min_shares_threshold)])
+    orders = [my_genOrder(x, n_shares[x]; account=account) for x in keys(n_shares)]
+    return orders
 end
 
 """
