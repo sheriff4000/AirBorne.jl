@@ -131,7 +131,7 @@ function ArimaForecaster(p::Int, d::Int, q::Int; reparameterise_window::Int = 0)
 	return Combine.Forecaster(arima, [p; d; q; reparameterise_window])
 end
 
-struct ArimaForecaster <: Combine.Forecaster
+struct ArimaForecaster <: Forecaster
 	p::Int
 	d::Int
 	q::Int

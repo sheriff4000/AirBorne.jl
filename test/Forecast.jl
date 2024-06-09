@@ -1,7 +1,7 @@
 using Test
-using AirBorne.Forecast.Linear: AutoRegressionForecast, LinearForecaster
-using AirBorne.Forecast.ARIMA: arima, ArimaForecaster
-using AirBorne.Forecast.Combine: combineForecasts, applyForecast
+using AirBorne.Forecast.Linear: AutoRegressionForecast, LinearForecaster, applyForecast
+using AirBorne.Forecast.ARIMA: arima, ArimaForecaster, applyForecast
+using AirBorne.Forecast.Combine: CombinedForecaster, applyForecast
 using Random
 
 data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]

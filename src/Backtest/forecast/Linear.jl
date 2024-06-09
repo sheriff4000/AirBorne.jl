@@ -62,7 +62,7 @@ end
 This struct represents a linear forecaster that uses the AutoRegressionForecast function
 """
 
-struct LinearForecaster <: Combine.Forecaster
+struct LinearForecaster <: Forecaster
 	lookback::Int
 	reparameterise_window::Int
 	LinearForecaster(lookback::Int; reparameterise_window::Int = 0) = new(lookback, reparameterise_window)
