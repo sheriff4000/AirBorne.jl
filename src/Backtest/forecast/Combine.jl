@@ -1,11 +1,12 @@
 module Combine
+using ..Forecast: Forecaster
 
 """
 This struct represents a combined forecaster that is a linear combination of other forecasters
 """
 struct CombinedForecaster <: Forecaster
-	forecasters::Vector{<:Forecaster}
-	weights::Vector{<:Real}
+	forecasters::Vector{T} where T <: Forecaster
+	weights::Vector{U} where U <: Real
 	CombinedForecaster(forecasters::Vector{Forecaster}, weights::Vector{<:Real}) = length(forecasters) == length(weights) ? new(forecasters, weights) : throw(ArgumentError("Length of forecasters and weights must be equal"))
 end
 

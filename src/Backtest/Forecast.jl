@@ -8,7 +8,9 @@ This struct represents a general forecaster that can be combined with others
 Can apply forecast to data with the following signature:
 forecastFunction(data::Vector{Real}, params::Real...; F::Int=1) -> Vector{Real}
 """
-struct Forecaster
+abstract type Forecaster end
+
+struct BaseForecaster <: Forecaster
 	forecastFunction::Function
 	params::Vector{Any}
 end
