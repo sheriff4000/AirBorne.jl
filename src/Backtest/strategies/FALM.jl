@@ -97,6 +97,23 @@ function falm_initialize!(
     return nothing
 end
 
+function my_genOrder(
+    assetId::Union{String,Symbol},
+    amount::Real;
+    account::Any=nothing,
+    orderType::String="MarketOrder",
+)
+    market, ticker = split(String(assetId), "/")
+    order_specs = DotMap(Dict())
+    order_specs.ticker = String(ticker)
+    order_specs.shares = amount # Number of shares to buy/sell
+    order_specs.type = orderType
+    if !(isnothing(account))
+        order_specs.account = account
+    end
+    return Order(String(market), order_specs)
+end
+
 """
 	This function generates the orders to obtain a particular value distribution on a given portfolio and static pricing.
 	It can consider proportional costs by scaling the orders amount by a factor and a fixed cost for each transacted asset.
