@@ -3,8 +3,7 @@ module FALM
 using ...Markets.StaticMarket: Order, place_order!, ordersForPortfolioRedistribution
 using AirBorne.ETL.AssetValuation: stockValuation
 using AirBorne.Utils: rvcat, rblockdiag, δ
-using AirBorne.Forecast: Forecaster, applyForecast
-using AirBorne.Forecast.Linear
+using AirBorne.Forecast
 using ...Structures: ContextTypeA
 using DataFrames: DataFrame
 using DirectSearch
