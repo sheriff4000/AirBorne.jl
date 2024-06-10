@@ -3,8 +3,7 @@ module FALM
 using ...Markets.StaticMarket: Order, place_order!, ordersForPortfolioRedistribution
 using AirBorne.ETL.AssetValuation: stockValuation
 using AirBorne.Utils: rvcat, rblockdiag, δ
-using ...Forecast.Combine: Forecaster, applyForecast
-using ...Forecast.Linear: LinearForecaster
+using AirBorne.Forecast
 using ...Structures: ContextTypeA
 using DataFrames: DataFrame
 using DirectSearch
@@ -22,21 +21,21 @@ using JuMP:
     @NLobjective,
     value,
     set_silent
-using SparseArrays: sparse, I, spdiagm
+using SparseArrays: sparse, I, spdiagm, SparseVector
 using Ipopt: Ipopt
 import MathOptInterface as MOI
 """
-    initialize!
+	initialize!
 
-    Template for the initialization procedure, before being passed onto an engine like DEDS a preloaded
-    function must be defined so that the initialization function meets the engine requirements.
-    
-    ```julia
-    # Specify custom arguments to tune the behaviour of FALM
-    my_initialize!(context,data) = FALM.initialize!(context;...)
-    # Or just run with the default parameters
-    my_initialize!(context,data) = FALM.trading_logic!(context)
-    ```
+	Template for the initialization procedure, before being passed onto an engine like DEDS a preloaded
+	function must be defined so that the initialization function meets the engine requirements.
+	
+	```julia
+	# Specify custom arguments to tune the behaviour of FALM
+	my_initialize!(context,data) = FALM.initialize!(context;...)
+	# Or just run with the default parameters
+	my_initialize!(context,data) = FALM.trading_logic!(context)
+	```
 """
 
 function falm_initialize!(
@@ -50,7 +49,7 @@ function falm_initialize!(
     assetIDs::Union{Vector{String}}=nothing, # Associated AssetIDs for the tickers
     transactionCost::Real=0.02, # Transaction cost
     currency::String="FEX/USD", # Currency to use
-    forecaster::Forecaster=LinearForecaster(1; reparameterise_window=0), # Forecasting function
+    forecaster::T where {T<:Forecaster}=LinearForecaster(1; reparameterise_window=0), # Forecasting function
     httype::Symbol=:average, # 1: Weighted Average holding time, 2: Minimum holding time
     min_alloc_threshold::Float64=0.7,
     min_returns_threshold::Float64=0.0002,
@@ -99,9 +98,9 @@ function falm_initialize!(
 end
 
 """
-    This function generates the orders to obtain a particular value distribution on a given portfolio and static pricing.
-    It can consider proportional costs by scaling the orders amount by a factor and a fixed cost for each transacted asset.
-    It returns the portfolio with the desired distribution and the maximum amount of value expressed in a particular currency.
+	This function generates the orders to obtain a particular value distribution on a given portfolio and static pricing.
+	It can consider proportional costs by scaling the orders amount by a factor and a fixed cost for each transacted asset.
+	It returns the portfolio with the desired distribution and the maximum amount of value expressed in a particular currency.
 """
 function my_ordersForPortfolioRedistribution(
     sourcePortfolio::Dict{String,Float64},
@@ -171,16 +170,16 @@ function my_ordersForPortfolioRedistribution(
 end
 
 """
-    compute_portfolio!
+	compute_portfolio!
 
-    This function computes the portfolio weights based on the LPM matrix and the forecasted returns
+	This function computes the portfolio weights based on the LPM matrix and the forecasted returns
 
-    Arguments:
-    - context::ContextTypeA: The context object
-    - data::DataFrame: The data to use
+	Arguments:
+	- context::ContextTypeA: The context object
+	- data::DataFrame: The data to use
 
-    Returns:
-    - Nothing
+	Returns:
+	- Nothing
 """
 
 function compute_portfolio!(context::ContextTypeA; data=DataFrame())

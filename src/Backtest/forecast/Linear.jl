@@ -2,7 +2,7 @@ module Linear
 
 using DataFrames
 using RollingFunctions
-using ..Combine
+using ..Forecast: Forecaster
 
 """
 This function returns the parameters of a linear regression model that predicts 
@@ -59,18 +59,22 @@ function AutoRegressionForecast(
 end
 
 """
-This function returns a forecaster object that can be used with the Combine module
-	
-Arguments:
-- lookback::int The number of previous values to consider
-- reparameterise_window::int The number of points to use for reparameterisation
-
-Returns:
-- forecaster::Combine.Forecaster The forecaster
+This struct represents a linear forecaster that uses the AutoRegressionForecast function
 """
 
-function LinearForecaster(lookback::Int; reparameterise_window::Int=0)
-    return Combine.Forecaster(AutoRegressionForecast, [lookback; reparameterise_window])
+struct LinearForecaster <: Forecaster
+    lookback::Int
+    reparameterise_window::Int
+    function LinearForecaster(lookback::Int; reparameterise_window::Int=0)
+        return new(lookback, reparameterise_window)
+    end
 end
+
+function applyForecast(forecaster::LinearForecaster, data::Vector{<:Real}; F::Int=1)
+    return AutoRegressionForecast(
+        data, forecaster.lookback, forecaster.reparameterise_window; F=F
+    )
+end
+export LinearForecaster
 
 end

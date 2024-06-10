@@ -6,7 +6,7 @@ using Random
 using Distributions
 using StatsBase
 
-using ..Combine
+using ..Forecast: Forecaster
 
 """
 This function applies differencing to a time series
@@ -115,20 +115,27 @@ function arima(series, p::Int, d::Int, q::Int, reparameterise_window::Int=0; F::
     return restored_series[(end - F + 1):end]
 end
 
-"""
-This function returns a forecaster object that can be used with the Combine module
-
-Arguments:
-- p::int: The number of lags to consider
-- d::int: The order of differencing
-- q::int: Moving average order
-
-Returns:
-- Combined::Combine.Forecaster: The forecaster
-"""
-
-function ArimaForecaster(p::Int, d::Int, q::Int; reparameterise_window::Int=0)
-    return Combine.Forecaster(arima, [p; d; q; reparameterise_window])
+struct ArimaForecaster <: Forecaster
+    p::Int
+    d::Int
+    q::Int
+    reparameterise_window::Int
+    function ArimaForecaster(p::Int, d::Int, q::Int; reparameterise_window::Int=0)
+        return new(p, d, q, reparameterise_window)
+    end
 end
+
+function applyForecast(forecaster::ArimaForecaster, series::Vector{<:Real}; F::Int=1)
+    return arima(
+        series,
+        forecaster.p,
+        forecaster.d,
+        forecaster.q,
+        forecaster.reparameterise_window;
+        F=F,
+    )
+end
+
+export ArimaForecaster
 
 end
