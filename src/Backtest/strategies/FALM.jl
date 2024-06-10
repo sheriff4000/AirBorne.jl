@@ -292,6 +292,7 @@ function compute_portfolio!(context::ContextTypeA; data=DataFrame())
         objective=obj,
         granularity=[0.001 for _ in context.extra.tickers],
         initial_point=init_point,
+        poll=OrthoMADS(),
     )
 
     AddExtremeConstraint(weights_problem, max_alloc)
