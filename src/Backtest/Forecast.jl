@@ -20,14 +20,14 @@ export Forecaster, BaseForecaster
 This function applies a forecast to a dataset
 
 Arguments:
-- forecaster::Forecaster: The forecaster to use
+- forecaster::BaseForecaster: The forecaster to use
 - data::Vector{Real}: The data to forecast
 - F::Int: The number of future values to forecast
 
 Returns:
 - forecast::Vector{Real}: The forecast
 """
-function applyForecast(forecaster::Forecaster, data; F=1)
+function applyForecast(forecaster::BaseForecaster, data; F=1)
     return forecaster.forecastFunction(data, forecaster.params...; F=F)
 end
 
