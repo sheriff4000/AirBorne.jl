@@ -251,9 +251,14 @@ function compute_portfolio!(context::ContextTypeA; data=DataFrame())
     if context.extra.httype == :average
         # Weighted Average Holding time
         context.extra.htcounter = round(Int, holding_time)
-    else
+    elseif context.extra.httype == :minimum
         # minimum holding time
         context.extra.htcounter = minimum(values(holding_times))
+    elseif context.extra.httype == :maximum
+        # maximum holding time
+        context.extra.htcounter = maximum(values(holding_times))
+    else
+        context.extra.htcounter = 0
     end
 
     #Compute the weights
